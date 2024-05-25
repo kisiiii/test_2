@@ -5,6 +5,8 @@ import pandas as pd
 import re
 import time
 import sqlite3
+from geopy.geocoders import Nominatim
+from geopy.extra.rate_limiter import RateLimiter
 
 
 def scrape_real_estate_data(base_url, max_page):
@@ -138,6 +140,41 @@ def split_access(row):
 
     return pd.Series(results)
 
+# 漢数字と丁目のマッピング
+kanji_map = str.maketrans({
+    '1': '一丁目',
+    '2': '二丁目',
+    '3': '三丁目',
+    '4': '四丁目',
+    '5': '五丁目',
+    '6': '六丁目',
+    '7': '七丁目',
+    '8': '八丁目',
+    '9': '九丁目',
+    '１': '一丁目',
+    '２': '二丁目',
+    '３': '三丁目',
+    '４': '四丁目',
+    '５': '五丁目',
+    '６': '六丁目',
+    '７': '七丁目',
+    '８': '八丁目',
+    '９': '九丁目',
+})
+
+def convert_address(address):
+    return address.translate(kanji_map)
+
+
+# 住所から緯度と経度を取得する関数
+def get_lat_lon(address):
+    geolocator = Nominatim(user_agent="myGeocoder")
+    geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
+    location = geocode(address)
+    if location:
+        return location.latitude, location.longitude
+    return None, None
+
 # データ加工のメイン関数
 def process_real_estate_data(dataframe):
     """
@@ -157,18 +194,21 @@ def process_real_estate_data(dataframe):
     dataframe['面積'] = dataframe['面積'].apply(process_area)
     dataframe['区'] = dataframe['アドレス'].apply(lambda x: split_address(x, "都", "区"))
     dataframe['市町'] = dataframe['アドレス'].apply(lambda x: split_address(x, "区", ""))
+    dataframe['漢数字アドレス'] = dataframe['アドレス'].apply(convert_address)
+    dataframe['緯度'], dataframe['経度'] = zip(*dataframe['漢数字アドレス'].apply(get_lat_lon))
+
     dataframe = dataframe.join(dataframe.apply(split_access, axis=1))
+
     return dataframe
 
 
 def main():
     # スクレイピング
     base_url = "https://suumo.jp/jj/chintai/ichiran/FR301FC001/?ar=030&bs=040&ta=13&sc=13101&sc=13102&cb=0.0&ct=9999999&et=9999999&cn=9999999&mb=0&mt=9999999&shkr1=03&shkr2=03&shkr3=03&shkr4=03&fw2=&srch_navi=1&page={}"# 千代田区,中央区
-    max_page = 1
-
-    print("2.スクレイピング開始", " : ページ数", max_page)
+    max_page = 10
+    print("1.スクレイピング開始", " : ページ数", max_page)
     scraped_data = scrape_real_estate_data(base_url, max_page)
-    print("2.スクレイピング完了")
+    print("1.スクレイピング完了")
 
     # データフレームに変換
     df = pd.DataFrame(scraped_data)
@@ -177,21 +217,21 @@ def main():
     df = df.drop_duplicates()
 
     # データ加工
-    print("4.不動産データの加工開始")
+    print("2.不動産データの加工開始")
     processed_df = process_real_estate_data(df)
-    print("4.不動産データの加工完了")
+    print("2.不動産データの加工完了")
 
     # room.dbにアスセスする。
     dbname = 'DB/room.db'
     conn = sqlite3.connect(dbname)
 
     # room.dbにデータをSQLiteに渡す
-    processed_df.to_sql('room',conn,if_exists='replace',index=None)
+    processed_df.to_sql('room_ver2',conn,if_exists='replace',index=None)
 
     # データベースへのコネクションを閉じる。(必須)
     conn.close()
 
-    print("スクレイピング完了")
+    print("3.スクレイピング完了")
 
 if __name__ == "__main__":
     main()

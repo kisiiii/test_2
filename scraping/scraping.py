@@ -205,7 +205,7 @@ def process_real_estate_data(dataframe):
 def main():
     # スクレイピング
     base_url = "https://suumo.jp/jj/chintai/ichiran/FR301FC001/?ar=030&bs=040&ta=13&sc=13101&sc=13102&cb=0.0&ct=9999999&et=9999999&cn=9999999&mb=0&mt=9999999&shkr1=03&shkr2=03&shkr3=03&shkr4=03&fw2=&srch_navi=1&page={}"# 千代田区,中央区
-    max_page = 10
+    max_page = 2
     print("1.スクレイピング開始", " : ページ数", max_page)
     scraped_data = scrape_real_estate_data(base_url, max_page)
     print("1.スクレイピング完了")

@@ -194,8 +194,8 @@ def process_real_estate_data(dataframe):
     dataframe['面積'] = dataframe['面積'].apply(process_area)
     dataframe['区'] = dataframe['アドレス'].apply(lambda x: split_address(x, "都", "区"))
     dataframe['市町'] = dataframe['アドレス'].apply(lambda x: split_address(x, "区", ""))
-    dataframe['漢数字アドレス'] = dataframe['アドレス'].apply(convert_address)
-    dataframe['緯度'], dataframe['経度'] = zip(*dataframe['漢数字アドレス'].apply(get_lat_lon))
+    #dataframe['漢数字アドレス'] = dataframe['アドレス'].apply(convert_address)
+    #dataframe['緯度'], dataframe['経度'] = zip(*dataframe['漢数字アドレス'].apply(get_lat_lon))
 
     dataframe = dataframe.join(dataframe.apply(split_access, axis=1))
 
@@ -205,7 +205,7 @@ def process_real_estate_data(dataframe):
 def main():
     # スクレイピング
     base_url = "https://suumo.jp/jj/chintai/ichiran/FR301FC001/?ar=030&bs=040&ta=13&sc=13101&sc=13102&cb=0.0&ct=9999999&et=9999999&cn=9999999&mb=0&mt=9999999&shkr1=03&shkr2=03&shkr3=03&shkr4=03&fw2=&srch_navi=1&page={}"# 千代田区,中央区
-    max_page = 2
+    max_page = 1
     print("1.スクレイピング開始", " : ページ数", max_page)
     scraped_data = scrape_real_estate_data(base_url, max_page)
     print("1.スクレイピング完了")

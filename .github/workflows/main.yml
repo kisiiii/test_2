@@ -3,7 +3,7 @@ name: scraping_bot
 on:
   push:
   schedule:
-    # 定期実行する時間・・・①
+    # 定期実行する時間
     - cron: '0 12 * * *'
 
 jobs:
@@ -28,5 +28,5 @@ jobs:
 
       - name: Run script
         run: |
-          # 定期実行するファイルを指定。・・・③
+          # 定期実行するファイルを指定
           python scraping/scraping.py

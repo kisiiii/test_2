@@ -4,7 +4,7 @@ on:
   push:
   schedule:
     # 定期実行する時間
-    - cron: '0 14 * * *'
+    - cron: "0 12 * * *"
 
 jobs:
   build:
@@ -30,3 +30,13 @@ jobs:
         run: |
           # 定期実行するファイルを指定
           python scraping/scraping.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'Kishi Masahiro'
+          git config --global user.email 'ksmshr1988@gmail.com'
+          git add DB/room.db
+          git commit -m 'Update database with latest scraped data'
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

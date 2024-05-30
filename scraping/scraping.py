@@ -194,8 +194,8 @@ def process_real_estate_data(dataframe):
     dataframe['面積'] = dataframe['面積'].apply(process_area)
     dataframe['区'] = dataframe['アドレス'].apply(lambda x: split_address(x, "都", "区"))
     dataframe['市町'] = dataframe['アドレス'].apply(lambda x: split_address(x, "区", ""))
-    #dataframe['漢数字アドレス'] = dataframe['アドレス'].apply(convert_address)
-    #dataframe['緯度'], dataframe['経度'] = zip(*dataframe['漢数字アドレス'].apply(get_lat_lon))
+    dataframe['漢数字アドレス'] = dataframe['アドレス'].apply(convert_address)
+    dataframe['緯度'], dataframe['経度'] = zip(*dataframe['漢数字アドレス'].apply(get_lat_lon))
 
     dataframe = dataframe.join(dataframe.apply(split_access, axis=1))
 
